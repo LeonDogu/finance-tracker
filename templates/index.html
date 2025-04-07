@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Finanz-Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+    <h1>Willkommen beim Finanz-Tracker!</h1>
+    <p>Hier wirst du bald Einnahmen & Ausgaben verwalten können 💸</p>
+
+    <hr>
+    <h2>Neue Transaktion hinzufügen</h2>
+
+    <form action="/add" method="post">
+        <label>Betrag:</label>
+        <input type="number" step="0.01" name="amount" required><br><br>
+
+        <label>Typ:</label>
+        <select name="type" required>
+            <option value="income">Einnahme</option>
+            <option value="expense">Ausgabe</option>
+        </select><br><br>
+
+        <label>Kategorie:</label>
+        <input type="text" name="category" required><br><br>
+
+        <label>Notiz:</label>
+        <input type="text" name="note"><br><br>
+
+        <button type="submit">Hinzufügen</button>
+    </form>
+
+    <hr>
+    <h2>Alle Transaktionen</h2>
+
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Betrag</th>
+            <th>Typ</th>
+            <th>Kategorie</th>
+            <th>Notiz</th>
+        </tr>
+        {% for row in transactions %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <hr>
+    <h2>Ausgaben nach Kategorie</h2>
+    <canvas id="expenseChart" width="300" height="300"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ labels | tojson }},
+                datasets: [{
+                    label: 'Ausgaben',
+                    data: {{ values | tojson }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
