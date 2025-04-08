@@ -16,9 +16,6 @@ Ein einfaches Web-Projekt zum Verwalten von Einnahmen und Ausgaben – gebaut mi
 
 
 
-## Live-Demo (optional)
-
-*Noch nicht online gehostet*
 
 ##  Projektstruktur
 ```finanz-tracker/ ├── app.py # Hauptlogik der Flask-App ├── database.py # Datenbank-Funktionen ├── requirements.txt # Python-Abhängigkeiten ├── screenshot.png # Screenshot der App ├── README.md # Projektbeschreibung ├── data.db # SQLite-Datenbank (wird automatisch erstellt) └── templates/ └── index.html # HTML-Oberfläche der App```
