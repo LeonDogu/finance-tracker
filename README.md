@@ -14,7 +14,12 @@ Ein einfaches Web-Projekt zum Verwalten von Einnahmen und Ausgaben – gebaut mi
 ![finance_tracker_head](https://github.com/user-attachments/assets/f80ca663-3f0c-43eb-a5f7-fa160a70b260)
 ![finance_tracker_pie_chart](https://github.com/user-attachments/assets/474b4f39-b7c4-419a-aef4-9cb15fb49ed6)
 
-
+## Tech-Stack 
+- Python 3
+- Flask
+- SQLite
+- HTML + Bootstrap
+- Chart.js
 
 
 ##  Projektstruktur
