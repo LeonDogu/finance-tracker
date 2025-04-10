@@ -6,13 +6,15 @@ Ein einfaches Web-Projekt zum Verwalten von Einnahmen und Ausgaben – gebaut mi
 
 - Transaktionen (Einnahmen & Ausgaben) hinzufügen
 - Übersicht aller Transaktionen
-- Kreisdiagramm der Ausgaben nach Kategorie (mit Chart.js)
+- Kreisdiagramm der Ausgaben und Einnahmen nach Kategorie (mit Chart.js)
+- Histogramme der Ausgaben und Einnahmen
 - Speicherung in SQLite-Datenbank
 - Flask als Backend-Framework
 
 ##  Screenshot
-![finance_tracker_head](https://github.com/user-attachments/assets/f80ca663-3f0c-43eb-a5f7-fa160a70b260)
-![finance_tracker_pie_chart](https://github.com/user-attachments/assets/474b4f39-b7c4-419a-aef4-9cb15fb49ed6)
+![127 0 0 1_5000_ (3)](https://github.com/user-attachments/assets/71c09949-7371-44ff-8827-441f74214b70)
+![Screenshot 2025-04-10 133945](https://github.com/user-attachments/assets/909026ec-a983-477a-afda-e058dce101c3)
+
 
 ## Tech-Stack 
 - Python 3
