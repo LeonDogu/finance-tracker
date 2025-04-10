@@ -1,49 +1,89 @@
 import sqlite3
 
+DB_PATH = "data.db"
+
 def init_db():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("""
+    c.execute('''
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             amount REAL,
             type TEXT,
             category TEXT,
-            note TEXT
+            note TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    ''')
     conn.commit()
     conn.close()
 
-
 def add_transaction(amount, ttype, category, note):
-    try:
-        conn = sqlite3.connect('data.db')
-        c = conn.cursor()
-
-        # Sicherstellen, dass der Betrag ein float ist
-        c.execute('INSERT INTO transactions (amount, type, category, note) VALUES (?, ?, ?, ?)',
-                  (float(amount), ttype, category, note))
-
-        conn.commit()
-        conn.close()
-
-    except Exception as e:
-        print(f"Fehler beim Hinzufügen der Transaktion in die DB: {e}")
-
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO transactions (amount, type, category, note)
+        VALUES (?, ?, ?, ?)
+    ''', (amount, ttype, category, note))
+    conn.commit()
+    conn.close()
 
 def get_all_transactions():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT * FROM transactions')
-    transactions = c.fetchall()
+    c.execute('SELECT * FROM transactions ORDER BY date DESC')
+    result = c.fetchall()
     conn.close()
-    return transactions
+    return result
 
 def get_expense_summary():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT category, SUM(amount) FROM transactions WHERE type = 'expense' GROUP BY category")
+    c.execute("""
+        SELECT category, SUM(amount) FROM transactions
+        WHERE type = 'expense'
+        GROUP BY category
+    """)
     data = c.fetchall()
     conn.close()
     return data
+
+def get_income_summary():
+    conn = sqlite3.connect("data.db")
+    c = conn.cursor()
+    c.execute("""
+        SELECT category, SUM(amount) FROM transactions
+        WHERE type = 'income'
+        GROUP BY category
+    """)
+    data = c.fetchall()
+    conn.close()
+    return data
+
+
+def get_balance():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT SUM(amount) FROM transactions")
+    balance = c.fetchone()[0] or 0
+    conn.close()
+    return round(balance, 2)
+
+def get_transactions_by_date():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        SELECT DATE(date), SUM(amount) FROM transactions
+        GROUP BY DATE(date)
+        ORDER BY DATE(date)
+    """)
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+def delete_transaction_by_id(transaction_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
+    conn.commit()
+    conn.close()

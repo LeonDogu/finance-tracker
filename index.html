@@ -4,89 +4,209 @@
     <meta charset="UTF-8">
     <title>Finanz-Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0d1b2a;
+            color: white;
+        }
+        .form-control, .form-select {
+            background-color: #1b263b;
+            color: white;
+            border: 1px solid #415a77;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #778da9;
+            box-shadow: 0 0 0 0.2rem rgba(119, 141, 169, 0.25);
+        }
+        table {
+            background-color: #1b263b;
+        }
+        th, td {
+            color: white;
+        }
+        .chart-container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .flex-pies {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        canvas {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+    </style>
 </head>
 <body class="container mt-4">
-    <h1>Willkommen beim Finanz-Tracker!</h1>
-    <p>Hier wirst du bald Einnahmen & Ausgaben verwalten können 💸</p>
+
+    <h1 class="text-center">Finanz-Tracker</h1>
+
+    <h3 class="text-center mt-3">
+        Aktueller Kontostand:
+        <span class="{{ 'text-success' if balance >= 0 else 'text-danger' }}">
+            {{ balance }} €
+        </span>
+    </h3>
 
     <hr>
+
     <h2>Neue Transaktion hinzufügen</h2>
+    <form action="/add" method="post" class="mb-4">
+        <div class="mb-3">
+            <label class="form-label">Betrag:</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required>
+        </div>
 
-    <form action="/add" method="post">
-        <label>Betrag:</label>
-        <input type="number" step="0.01" name="amount" required><br><br>
+        <div class="mb-3">
+            <label class="form-label">Typ:</label>
+            <select name="type" class="form-select" required>
+                <option value="income">Einnahme</option>
+                <option value="expense">Ausgabe</option>
+            </select>
+        </div>
 
-        <label>Typ:</label>
-        <select name="type" required>
-            <option value="income">Einnahme</option>
-            <option value="expense">Ausgabe</option>
-        </select><br><br>
+        <div class="mb-3">
+            <label class="form-label">Kategorie:</label>
+            <input type="text" name="category" class="form-control" required>
+        </div>
 
-        <label>Kategorie:</label>
-        <input type="text" name="category" required><br><br>
+        <div class="mb-3">
+            <label class="form-label">Notiz:</label>
+            <input type="text" name="note" class="form-control">
+        </div>
 
-        <label>Notiz:</label>
-        <input type="text" name="note"><br><br>
-
-        <button type="submit">Hinzufügen</button>
+        <button type="submit" class="btn btn-primary">Hinzufügen</button>
     </form>
 
     <hr>
-    <h2>Alle Transaktionen</h2>
 
-    <table border="1" cellpadding="5">
-        <tr>
-            <th>ID</th>
-            <th>Betrag</th>
-            <th>Typ</th>
-            <th>Kategorie</th>
-            <th>Notiz</th>
-        </tr>
-        {% for row in transactions %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <h2>Alle Transaktionen</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Betrag</th>
+                    <th>Typ</th>
+                    <th>Kategorie</th>
+                    <th>Notiz</th>
+                    <th>Datum</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in transactions %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }} €</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>{{ row[5] }}</td>
+                    <td>
+                        <form action="/delete/{{ row[0] }}" method="post" onsubmit="return confirm('Wirklich löschen?');">
+                            <button class="btn btn-danger btn-sm">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <hr>
-    <h2>Ausgaben nach Kategorie</h2>
-<div style="position: relative; height: 300px; max-width: 400px; margin: auto;">
-    <canvas id="expenseChart"></canvas>
-</div>
+    <h2 class="text-center">Kategorienübersicht</h2>
+    <div class="flex-pies mb-5">
+        <div>
+            <h5 class="text-center">Ausgaben</h5>
+            <canvas id="expensePie" width="250" height="250"></canvas>
+        </div>
+        <div>
+            <h5 class="text-center">Einnahmen</h5>
+            <canvas id="incomePie" width="250" height="250"></canvas>
+        </div>
+    </div>
 
+    <h2 class="text-center">Historie: Einnahmen & Ausgaben</h2>
+    <div class="chart-container mb-5">
+        <canvas id="histogramChart"></canvas>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('expenseChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: {{ labels|tojson }},
-            datasets: [{
-                label: 'Ausgaben',
-                data: {{ values|tojson }},
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)',
-                    'rgba(255, 159, 64, 0.7)'
-                ],
-                borderWidth: 1
-            }]
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Daten aus dem Server
+        const expenseLabels = {{ expense_labels | tojson }};
+        const expenseValues = {{ expense_values | tojson }};
+
+        const incomeLabels = {{ income_labels | tojson }};
+        const incomeValues = {{ income_values | tojson }};
+
+        const dates = {{ dates | tojson }};
+        const amounts = {{ daily_amounts | tojson }};
+
+        // Pie-Chart: Ausgaben
+        new Chart(document.getElementById('expensePie'), {
+            type: 'pie',
+            data: {
+                labels: expenseLabels,
+                datasets: [{
+                    data: expenseValues,
+                    backgroundColor: ['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#1d3557']
+                }]
+            }
+        });
+
+        // Pie-Chart: Einnahmen
+        new Chart(document.getElementById('incomePie'), {
+            type: 'pie',
+            data: {
+                labels: incomeLabels,
+                datasets: [{
+                    data: incomeValues,
+                    backgroundColor: ['#06d6a0', '#118ab2', '#ffd166', '#ef476f', '#073b4c']
+                }]
+            }
+        });
+
+        // Histogramm
+new Chart(document.getElementById('histogramChart'), {
+    type: 'bar',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Saldo pro Tag (€)',
+            data: amounts,
+            backgroundColor: amounts.map(v => v >= 0 ? '#06d6a0' : '#ef476f') // grün oder rot
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: false,
+                ticks: {
+                    callback: function(value) {
+                        return value + ' €';
+                    }
+                }
+            }
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `${context.parsed.y} € am ${context.label}`;
+                    }
+                }
+            }
         }
-    });
-</script>
+    }
+});
 
+    </script>
 </body>
 </html>
