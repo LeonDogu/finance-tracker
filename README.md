@@ -12,7 +12,7 @@ Ein einfaches Web-Projekt zum Verwalten von Einnahmen und Ausgaben – gebaut mi
 - Flask als Backend-Framework
 
 ##  Screenshot
-![127 0 0 1_5000_ (3)](https://github.com/user-attachments/assets/71c09949-7371-44ff-8827-441f74214b70)
+![127 0 0 1_5000_ (2)](https://github.com/user-attachments/assets/3f501f49-3b2f-40d0-9970-442b5356b2e9)
 ![Screenshot 2025-04-10 133945](https://github.com/user-attachments/assets/909026ec-a983-477a-afda-e058dce101c3)
 
 
